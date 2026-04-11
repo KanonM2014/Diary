@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+import ast
 Router = APIRouter()
 
 @Router.post ("/Diary")
@@ -37,17 +38,23 @@ def MenghapusDiary (Urutan:int):
 
 @Router.put ("/Diary")
 def MembenarkanDiary (Urutan:int,Pilihan:str,Mengganti:str):
+    # Parse string menjadi dict
+    diary_dict = ast.literal_eval(Diaries[Urutan-1])
+
     if Pilihan=="Tanggal":
-        Diaries[Urutan-1]
-        Diaries[Urutan-1]["Tanggalnya"]=Mengganti
-        return"Diary berhasil di ubah"
+        diary_dict["Tanggalnya"]=Mengganti
+    elif Pilihan=="Judul":
+        diary_dict["Judulnya"]=Mengganti
+    elif Pilihan=="Isi":
+        diary_dict["Isi"]=Mengganti
+    else:
+        return "Pilihan tidak valid"
 
-    if Pilihan=="Judul":
-        Diaries[Urutan-1]
-        Diaries[Urutan-1]["Judulnya"]=Mengganti
-        return"Diary berhasil di ubah"
+    Diaries[Urutan-1] = str(diary_dict)
 
-    if Pilihan=="Isi":
-        Diaries[Urutan-1]
-        Diaries[Urutan-1]["Isinya"]=Mengganti
-        return"Diary berhasil di ubah"    
+    # Tulis kembali ke file
+    file=open("dairy.txt","w")
+    for diary in Diaries:
+        file.write(str(diary)+"\n")
+    file.close()
+    return"Diary berhasil di ubah"

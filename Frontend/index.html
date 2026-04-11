@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary Harian</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-icon">📖</div>
+            <h1>Diary Harian</h1>
+            <p class="subtitle">Tulis cerita harimu di sini</p>
+        </header>
+
+        <!-- Form Tambah Diary -->
+        <section class="card form-card">
+            <h2 id="form-title">✏️ Tulis Diary Baru</h2>
+            <form id="diary-form">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal</label>
+                    <input type="date" id="tanggal" required>
+                </div>
+                <div class="form-group">
+                    <label for="judul">Judul</label>
+                    <input type="text" id="judul" placeholder="Judul diary kamu..." required>
+                </div>
+                <div class="form-group">
+                    <label for="isi">Isi Diary</label>
+                    <textarea id="isi" rows="5" placeholder="Ceritakan harimu..." required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btn-submit">
+                        <span id="btn-text">Simpan Diary</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancel" style="display:none;" onclick="cancelEdit()">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Daftar Diary -->
+        <section class="diary-section">
+            <h2>📚 Daftar Diary</h2>
+            <div id="diary-list" class="diary-list">
+                <div class="loading">Memuat diary...</div>
+            </div>
+            <div id="empty-state" class="empty-state" style="display:none;">
+                <div class="empty-icon">📝</div>
+                <p>Belum ada diary. Mulai tulis diary pertamamu!</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="delete-modal" class="modal-overlay" style="display:none;">
+        <div class="modal">
+            <div class="modal-icon">🗑️</div>
+            <h3>Hapus Diary?</h3>
+            <p>Diary ini akan dihapus secara permanen. Apakah kamu yakin?</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Batal</button>
+                <button class="btn btn-danger" id="btn-confirm-delete">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" style="display:none;"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
