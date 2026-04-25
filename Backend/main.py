@@ -1,4 +1,5 @@
-from Backend.api.Dairy import Router as Diary_router
+from .api.Dairy import Router as Diary_router
+from .api.login import Router as Login_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -21,6 +22,8 @@ app.add_middleware(
 )
 
 app.include_router(router=Diary_router,tags=["Diary"])
+app.include_router(router=Login_router,tags=["Login"])
+
 
 frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Frontend")
 app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
