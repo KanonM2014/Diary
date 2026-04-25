@@ -7,12 +7,35 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-icon">🔐</div>
+            <h1>Diary Harian</h1>
+            <p class="login-subtitle">Masuk untuk melanjutkan</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" placeholder="Masukkan username..." required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Masukkan password..." required>
+                </div>
+                <div id="login-error" class="login-error" style="display:none;"></div>
+                <button type="submit" class="btn btn-primary btn-login">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App (hidden until login) -->
+    <div id="app-screen" class="container" style="display:none;">
         <!-- Header -->
         <header class="header">
             <div class="header-icon">📖</div>
             <h1>Diary Harian</h1>
             <p class="subtitle">Tulis cerita harimu di sini</p>
+            <button class="btn btn-logout" id="btn-logout">Keluar</button>
         </header>
 
         <!-- Form Tambah Diary -->

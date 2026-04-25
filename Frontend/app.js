@@ -2,6 +2,46 @@ const API_BASE = window.location.origin;
 
 let editingIndex = null;
 
+// ===== Login =====
+
+async function login(username, password) {
+    const params = new URLSearchParams({ username, password });
+    const res = await fetch(`${API_BASE}/login?${params}`, { method: 'POST' });
+    if (!res.ok) throw new Error('Gagal menghubungi server');
+    return res.json();
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+    const errorEl = document.getElementById('login-error');
+
+    if (!username || !password) return;
+
+    try {
+        const result = await login(username, password);
+        if (result === 'Login successful') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            renderDiaries();
+        } else {
+            errorEl.textContent = 'Username atau password salah!';
+            errorEl.style.display = 'block';
+        }
+    } catch (err) {
+        errorEl.textContent = 'Gagal menghubungi server.';
+        errorEl.style.display = 'block';
+    }
+});
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-form').reset();
+    document.getElementById('login-error').style.display = 'none';
+});
+
 // ===== Utility Functions =====
 
 function formatDate(dateStr) {
@@ -259,6 +299,3 @@ document.getElementById('delete-modal').addEventListener('click', (e) => {
 
 // ===== Set default date to today =====
 document.getElementById('tanggal').valueAsDate = new Date();
-
-// ===== Initial Load =====
-renderDiaries();
