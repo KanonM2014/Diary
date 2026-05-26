@@ -1,60 +1,53 @@
+import sqlite3
+
 from fastapi import APIRouter
-import ast
+
 Router = APIRouter()
 
+
 @Router.post ("/Diary")
-def MembuatDiary (Tanggal:str,Judul:str,Isi:str):
-    Diary = {
-        "Tanggalnya":Tanggal,
-        "Judulnya":Judul,
-        "Isi":Isi
-        }
-    
-    file=open("dairy.txt","a+")
-    file.write(str(Diary)+"\n")
-    file.close()
+def MembuatDiary (tanggal:str,judul:str,isi:str):
+    conn = sqlite3.connect("diary.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        '''CREATE TABLE IF NOT EXISTS diary(
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            Tanggal TEXT NOT NULL,
+            Judul TEXT NOT NULL,
+            Isi TEXT NOT NULL
+        )
+        '''
+    )
+    cursor.execute(
+       f'''INSERT INTO diary (Tanggal, Judul, Isi) VALUES ({tanggal}, {judul}, {isi})'''
+        
+    )
+    conn.commit()
+    conn.close()
     return f"Diary berhasil ditambahkan."
 
 @Router.get("/Diary")
 def MembacaDiary ():
-    global Diaries
-    file=open("dairy.txt","a+")
-    file.seek(0)
-    Diaries=file.read().strip()
-    Diaries =Diaries.split("\n")
-    return Diaries
-
+    conn = sqlite3.connect("diary.db")
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM diary')
+    diaries = cursor.fetchall()
+    conn.close()
+    return diaries
 @Router.delete ("/Diary")
 def MenghapusDiary (Urutan:int):
-    Diaries[Urutan-1]
-    del Diaries[Urutan-1]
-    print("Dairies: ",Diaries )
-    file=open("dairy.txt","a+")
-    file.truncate(0)
-    for diary in Diaries:
-        file.write(str(diary)+"\n")
-    file.close()
-    return"Diary telah dihapuskan." 
-
+    conn = sqlite3.connect("diary.db")
+    cursor = conn.cursor()
+    cursor.execute(f'DELETE FROM diary WHERE id={Urutan}')
+    conn.commit()
+    conn.close()
+    return f"Diary berhasil dihapus."
 @Router.put ("/Diary")
 def MembenarkanDiary (Urutan:int,Pilihan:str,Mengganti:str):
-    # Parse string menjadi dict
-    diary_dict = ast.literal_eval(Diaries[Urutan-1])
-
-    if Pilihan=="Tanggal":
-        diary_dict["Tanggalnya"]=Mengganti
-    elif Pilihan=="Judul":
-        diary_dict["Judulnya"]=Mengganti
-    elif Pilihan=="Isi":
-        diary_dict["Isi"]=Mengganti
-    else:
-        return "Pilihan tidak valid"
-
-    Diaries[Urutan-1] = str(diary_dict)
-
-    # Tulis kembali ke file
-    file=open("dairy.txt","w")
-    for diary in Diaries:
-        file.write(str(diary)+"\n")
-    file.close()
-    return"Diary berhasil di ubah"
+    conn = sqlite3.connect("diary.db")
+    cursor = conn.cursor()
+    cursor.execute(f'UPDATE diary SET {Pilihan}={Mengganti} WHERE id={Urutan}')
+    conn.commit()       
+    conn.close()
+    return f"Diary berhasil diganti."
