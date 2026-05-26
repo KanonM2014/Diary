@@ -1,20 +1,18 @@
+import sqlite3
+
 from fastapi import APIRouter
 Router = APIRouter()
 
 @Router.post("/login")
 def login(username, password):
-    file=open("login.txt","a+")
-    file.seek(0)
-    login_var=file.read()
-    login_var=login_var.split("\n")
+    conn = sqlite3.connect('database/diary.db')  
+    cursor = conn.cursor()
+    cursor.execute ('SELECT username, password FROM login')
+    login_var = cursor.fetchone()
 
     or_username=login_var[0]
-    or_username=or_username.split("=")
-    or_username=or_username[1]
-    
     or_password=login_var[1]
-    or_password=or_password.split("=")
-    or_password=or_password[1]
+
 
 
     if username == or_username and password == or_password:
