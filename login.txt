@@ -1,2 +1,0 @@
-or_username=Halo
-or_password=Bye

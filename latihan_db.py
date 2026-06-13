@@ -1,6 +1,6 @@
 import sqlite3
-
-conn = sqlite3.connect('database/diary.db')  
+    
+conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")  
 cursor = conn.cursor()
 cursor.execute(
     '''

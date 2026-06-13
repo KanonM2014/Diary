@@ -12,19 +12,54 @@
         <div class="login-card">
             <div class="login-icon">🔐</div>
             <h1>Diary Harian</h1>
-            <p class="login-subtitle">Masuk untuk melanjutkan</p>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="login-username">Username</label>
-                    <input type="text" id="login-username" placeholder="Masukkan username..." required>
-                </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" placeholder="Masukkan password..." required>
-                </div>
-                <div id="login-error" class="login-error" style="display:none;"></div>
-                <button type="submit" class="btn btn-primary btn-login">Masuk</button>
-            </form>
+            
+            <!-- Login Form -->
+            <div id="login-form-container" style="display: block;">
+                <p class="login-subtitle">Masuk untuk melanjutkan</p>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" placeholder="Masukkan username..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" placeholder="Masukkan password..." required>
+                    </div>
+                    <div id="login-error" class="login-error" style="display:none;"></div>
+                    <button type="submit" class="btn btn-primary btn-login">Masuk</button>
+                </form>
+                <p class="toggle-form">Belum punya akun? <button type="button" id="toggle-signup" class="link-btn">Daftar di sini</button></p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-form-container" style="display: none;">
+                <p class="login-subtitle">Buat Akun Baru</p>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-username">Username</label>
+                        <input type="text" id="signup-username" placeholder="Masukkan username..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" placeholder="Masukkan password..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-nama-lengkap">Nama Lengkap</label>
+                        <input type="text" id="signup-nama-lengkap" placeholder="Masukkan nama lengkap..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-umur">Umur</label>
+                        <input type="number" id="signup-umur" placeholder="Masukkan umur..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-cita-cita">Cita-cita</label>
+                        <input type="text" id="signup-cita-cita" placeholder="Masukkan cita-cita..." required>
+                    </div>
+                    <div id="signup-error" class="login-error" style="display:none;"></div>
+                    <button type="submit" class="btn btn-primary btn-login">Daftar</button>
+                </form>
+                <p class="toggle-form">Sudah punya akun? <button type="button" id="toggle-login" class="link-btn">Masuk di sini</button></p>
+            </div>
         </div>
     </div>
 
@@ -35,7 +70,10 @@
             <div class="header-icon">📖</div>
             <h1>Diary Harian</h1>
             <p class="subtitle">Tulis cerita harimu di sini</p>
-            <button class="btn btn-logout" id="btn-logout">Keluar</button>
+            <div class="header-actions">
+                <button class="btn btn-logout" id="btn-logout">Keluar</button>
+                <button class="btn btn-danger" id="btn-delete-account">Hapus Akun</button>
+            </div>
         </header>
 
         <!-- Form Tambah Diary -->

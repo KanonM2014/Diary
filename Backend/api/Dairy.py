@@ -7,9 +7,8 @@ Router = APIRouter()
 
 @Router.post ("/Diary")
 def MembuatDiary (tanggal:str,judul:str,isi:str):
-    conn = sqlite3.connect("diary.db")
+    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
     cursor = conn.cursor()
-
     cursor.execute(
         '''CREATE TABLE IF NOT EXISTS diary(
             id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -18,10 +17,10 @@ def MembuatDiary (tanggal:str,judul:str,isi:str):
             Isi TEXT NOT NULL
         )
         '''
-    )
+    )       
     cursor.execute(
-       f'''INSERT INTO diary (Tanggal, Judul, Isi) VALUES ({tanggal}, {judul}, {isi})'''
-        
+       'INSERT INTO diary (Tanggal, Judul, Isi) VALUES (?, ?, ?)', 
+       (tanggal, judul, isi)
     )
     conn.commit()
     conn.close()
@@ -29,15 +28,16 @@ def MembuatDiary (tanggal:str,judul:str,isi:str):
 
 @Router.get("/Diary")
 def MembacaDiary ():
-    conn = sqlite3.connect("diary.db")
+    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM diary')
     diaries = cursor.fetchall()
     conn.close()
     return diaries
+
 @Router.delete ("/Diary")
 def MenghapusDiary (Urutan:int):
-    conn = sqlite3.connect("diary.db")
+    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
     cursor = conn.cursor()
     cursor.execute(f'DELETE FROM diary WHERE id={Urutan}')
     conn.commit()
@@ -45,9 +45,12 @@ def MenghapusDiary (Urutan:int):
     return f"Diary berhasil dihapus."
 @Router.put ("/Diary")
 def MembenarkanDiary (Urutan:int,Pilihan:str,Mengganti:str):
-    conn = sqlite3.connect("diary.db")
+    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
     cursor = conn.cursor()
-    cursor.execute(f'UPDATE diary SET {Pilihan}={Mengganti} WHERE id={Urutan}')
+    cursor.execute(
+    'UPDATE diary SET {} = ? WHERE id = ?'.format(Pilihan),
+    (Mengganti, Urutan)
+)
     conn.commit()       
     conn.close()
     return f"Diary berhasil diganti."

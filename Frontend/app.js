@@ -1,16 +1,93 @@
 const API_BASE = window.location.origin;
 
 let editingIndex = null;
+let currentUsername = null;
 
 // ===== Login =====
 
-async function login(username, password) {
-    const params = new URLSearchParams({ username, password });
-    const res = await fetch(`${API_BASE}/login?${params}`, { method: 'POST' });
-    if (!res.ok) throw new Error('Gagal menghubungi server');
-    return res.json();
+function normalizeBackendText(text) {
+    let normalized = text.trim();
+    if (normalized.startsWith('"') && normalized.endsWith('"')) {
+        normalized = normalized.slice(1, -1);
+    }
+    return normalized;
 }
 
+async function login(username, password) {
+    const params = new URLSearchParams({ Username: username, Password: password });
+    const res = await fetch(`${API_BASE}/login?${params}`, { method: 'GET' });
+    if (!res.ok) throw new Error('Gagal menghubungi server');
+    const text = normalizeBackendText(await res.text());
+    console.log('Login response:', text);
+    return text;
+}
+
+async function signup(username, password, namaLengkap, umur, citaCita) {
+    const params = new URLSearchParams({ 
+        Username: username, 
+        Password: password,
+        Nama_Lengkap: namaLengkap,
+        Umur: umur,
+        Cita_cita: citaCita
+    });
+    const res = await fetch(`${API_BASE}/Sign%20Up?${params}`, { method: 'POST' });
+    if (!res.ok) throw new Error('Gagal menghubungi server');
+    return res.text();
+}
+
+async function hapusAkun(username) {
+    const params = new URLSearchParams({ Username: username });
+    const res = await fetch(`${API_BASE}/Hapus%20Akun?${params}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Gagal menghubungi server');
+    return res.text();
+}
+
+// Toggle Login/Signup
+document.getElementById('toggle-signup').addEventListener('click', () => {
+    document.getElementById('login-form-container').style.display = 'none';
+    document.getElementById('signup-form-container').style.display = 'block';
+});
+
+document.getElementById('toggle-login').addEventListener('click', () => {
+    document.getElementById('signup-form-container').style.display = 'none';
+    document.getElementById('login-form-container').style.display = 'block';
+});
+
+// Signup Form Handler
+document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('signup-username').value.trim();
+    const password = document.getElementById('signup-password').value.trim();
+    const namaLengkap = document.getElementById('signup-nama-lengkap').value.trim();
+    const umur = document.getElementById('signup-umur').value.trim();
+    const citaCita = document.getElementById('signup-cita-cita').value.trim();
+    const errorEl = document.getElementById('signup-error');
+
+    if (!username || !password || !namaLengkap || !umur || !citaCita) {
+        errorEl.textContent = 'Semua field harus diisi!';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    try {
+        const result = await signup(username, password, namaLengkap, umur, citaCita);
+        if (result.includes('berhasil')) {
+            errorEl.style.display = 'none';
+            alert('Pendaftaran berhasil! Silakan login.');
+            document.getElementById('signup-form').reset();
+            document.getElementById('signup-form-container').style.display = 'none';
+            document.getElementById('login-form-container').style.display = 'block';
+        } else {
+            errorEl.textContent = 'Gagal mendaftar!';
+            errorEl.style.display = 'block';
+        }
+    } catch (err) {
+        errorEl.textContent = 'Gagal menghubungi server.';
+        errorEl.style.display = 'block';
+    }
+});
+
+// Login Form Handler
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('login-username').value.trim();
@@ -22,6 +99,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     try {
         const result = await login(username, password);
         if (result === 'Login successful') {
+            currentUsername = username;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-screen').style.display = 'block';
             renderDiaries();
@@ -40,6 +118,26 @@ document.getElementById('btn-logout').addEventListener('click', () => {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('login-form').reset();
     document.getElementById('login-error').style.display = 'none';
+    currentUsername = null;
+});
+
+document.getElementById('btn-delete-account').addEventListener('click', async () => {
+    if (!currentUsername) return;
+    
+    const confirmed = confirm('Apakah Anda yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan dan semua data Anda akan hilang.');
+    if (!confirmed) return;
+    
+    try {
+        const result = await hapusAkun(currentUsername);
+        alert('Akun berhasil dihapus. Anda akan dialihkan ke halaman login.');
+        document.getElementById('app-screen').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('login-form').reset();
+        document.getElementById('login-error').style.display = 'none';
+        currentUsername = null;
+    } catch (err) {
+        alert('Gagal menghapus akun: ' + err.message);
+    }
 });
 
 // ===== Utility Functions =====
