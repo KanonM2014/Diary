@@ -97,18 +97,24 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if (!username || !password) return;
 
     try {
+        console.log('Attempt login for:', username);
         const result = await login(username, password);
-        if (result === 'Login successful') {
+        console.log('Server login response:', result);
+
+        // Accept any response that contains "success" (case-insensitive)
+        if (typeof result === 'string' && result.toLowerCase().includes('success')) {
             currentUsername = username;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-screen').style.display = 'block';
             renderDiaries();
         } else {
-            errorEl.textContent = 'Username atau password salah!';
+            // Show server response to help debugging; fallback to generic message
+            errorEl.textContent = result && result.length ? result : 'Username atau password salah!';
             errorEl.style.display = 'block';
         }
     } catch (err) {
-        errorEl.textContent = 'Gagal menghubungi server.';
+        console.error('Login error:', err);
+        errorEl.textContent = 'Gagal menghubungi server.' + (err && err.message ? ' (' + err.message + ')' : '');
         errorEl.style.display = 'block';
     }
 });
@@ -137,6 +143,52 @@ document.getElementById('btn-delete-account').addEventListener('click', async ()
         currentUsername = null;
     } catch (err) {
         alert('Gagal menghapus akun: ' + err.message);
+    }
+});
+
+document.getElementById('btn-change-password').addEventListener('click', () => {
+    document.getElementById('change-password-card').style.display = 'block';
+});
+
+document.getElementById('btn-cancel-password').addEventListener('click', () => {
+    document.getElementById('change-password-card').style.display = 'none';
+    document.getElementById('change-password-form').reset();
+    document.getElementById('change-password-error').style.display = 'none';
+});
+
+document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById('current-password').value.trim();
+    const newPassword = document.getElementById('new-password').value.trim();
+    const errorEl = document.getElementById('change-password-error');
+
+    if (!currentPassword || !newPassword) {
+        errorEl.textContent = 'Password lama dan baru harus diisi.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    if (!currentUsername) {
+        errorEl.textContent = 'Anda harus login terlebih dahulu.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    try {
+        const result = await gantiPassword(currentUsername, currentPassword, newPassword);
+        if (result.toLowerCase().includes('berhasil')) {
+            showToast('Password berhasil diganti!', 'success');
+            document.getElementById('change-password-card').style.display = 'none';
+            document.getElementById('change-password-form').reset();
+            errorEl.style.display = 'none';
+        } else {
+            errorEl.textContent = result;
+            errorEl.style.display = 'block';
+        }
+    } catch (err) {
+        errorEl.textContent = err.message || 'Gagal mengganti password.';
+        errorEl.style.display = 'block';
     }
 });
 
@@ -207,10 +259,12 @@ async function fetchDiaries() {
 }
 
 async function createDiary(tanggal, judul, isi) {
-    const params = new URLSearchParams({ Tanggal: tanggal, Judul: judul, Isi: isi });
+    const params = new URLSearchParams({ tanggal: tanggal, judul: judul, isi: isi });
     const res = await fetch(`${API_BASE}/Diary?${params}`, { method: 'POST' });
-    if (!res.ok) throw new Error('Gagal membuat diary');
-    return res.json();
+    const text = await res.text();
+    console.log('createDiary response status:', res.status, 'body:', text);
+    if (!res.ok) throw new Error(text || 'Gagal membuat diary');
+    return text;
 }
 
 async function deleteDiary(urutan) {
@@ -218,6 +272,19 @@ async function deleteDiary(urutan) {
     const res = await fetch(`${API_BASE}/Diary?${params}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Gagal menghapus diary');
     return res.json();
+}
+
+async function gantiPassword(username, passwordLama, passwordBaru) {
+    const params = new URLSearchParams({
+        Username: username,
+        Password_Lama: passwordLama,
+        Password_Baru: passwordBaru
+    });
+    const res = await fetch(`${API_BASE}/Ganti%20Password?${params}`, { method: 'PUT' });
+    const text = await res.text();
+    console.log('gantiPassword response status:', res.status, 'body:', text);
+    if (!res.ok) throw new Error(text || 'Gagal mengganti password');
+    return text;
 }
 
 async function updateDiary(urutan, pilihan, mengganti) {
@@ -242,8 +309,15 @@ async function renderDiaries() {
 
     const diaries = await fetchDiaries();
 
-    // Filter out empty strings
-    const validDiaries = diaries.filter(d => d && d.trim && d.trim() !== '');
+    // Normalize list and filter empty entries (support string, array (tuple), or object)
+    let validDiaries = Array.isArray(diaries) ? diaries : [];
+    validDiaries = validDiaries.filter(d => {
+        if (d == null) return false;
+        if (typeof d === 'string') return d.trim() !== '';
+        if (Array.isArray(d)) return d.length >= 4; // expect [id, Tanggal, Judul, Isi]
+        if (typeof d === 'object') return Object.keys(d).length > 0;
+        return true;
+    });
 
     if (validDiaries.length === 0) {
         listEl.innerHTML = '';
@@ -257,16 +331,34 @@ async function renderDiaries() {
     diaryData = [];
 
     validDiaries.forEach((item, idx) => {
-        const diary = parseDiaryString(item);
-        if (!diary) return;
+        let tanggal = '-';
+        let judul = '-';
+        let isi = '-';
+        let dbId = idx + 1; // fallback id for display if not provided by backend
 
-        const tanggal = diary.Tanggalnya || '-';
-        const judul = diary.Judulnya || '-';
-        const isi = diary.Isi || diary.Isinya || '-';
-        const urutan = idx + 1;
+        if (typeof item === 'string') {
+            const parsed = parseDiaryString(item);
+            if (!parsed) return;
+            tanggal = parsed.Tanggalnya || parsed.Tanggal || parsed.tanggal || '-';
+            judul = parsed.Judulnya || parsed.Judul || parsed.judul || '-';
+            isi = parsed.Isi || parsed.Isinya || parsed.isi || '-';
+        } else if (Array.isArray(item)) {
+            // SQLite row tuple: [id, Tanggal, Judul, Isi]
+            dbId = item[0] || dbId;
+            tanggal = item[1] || '-';
+            judul = item[2] || '-';
+            isi = item[3] || '-';
+        } else if (typeof item === 'object') {
+            dbId = item.id || item.ID || item[0] || dbId;
+            tanggal = item.Tanggal || item.tanggal || item.Tanggalnya || '-';
+            judul = item.Judul || item.judul || item.Judulnya || '-';
+            isi = item.Isi || item.isi || item.Isinya || '-';
+        }
 
-        // Store raw data for edit
-        diaryData.push({ urutan, tanggal, judul, isi });
+        const displayNumber = idx + 1;
+
+        // Store raw data for edit (use dbId for update/delete)
+        diaryData.push({ urutan: dbId, tanggal, judul, isi });
 
         const entry = document.createElement('div');
         entry.className = 'diary-entry';
@@ -274,13 +366,13 @@ async function renderDiaries() {
         entry.innerHTML = `
             <div class="diary-header">
                 <div class="diary-meta">
-                    <span class="diary-number">#${urutan}</span>
+                    <span class="diary-number">#${displayNumber}</span>
                     <div class="diary-date">📅 ${escapeHtml(tanggal)}</div>
                     <div class="diary-title">${escapeHtml(judul)}</div>
                 </div>
                 <div class="diary-actions">
                     <button class="btn btn-secondary btn-sm btn-edit" data-index="${idx}">✏️ Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${urutan})">🗑️</button>
+                    <button class="btn btn-danger btn-sm" onclick="openDeleteModal(${dbId})">🗑️</button>
                 </div>
             </div>
             <div class="diary-content">${escapeHtml(isi)}</div>
@@ -288,7 +380,7 @@ async function renderDiaries() {
 
         // Attach edit handler via addEventListener (safe from escaping issues)
         entry.querySelector('.btn-edit').addEventListener('click', () => {
-            startEdit(urutan, tanggal, judul, isi);
+            startEdit(dbId, tanggal, judul, isi);
         });
 
         listEl.appendChild(entry);

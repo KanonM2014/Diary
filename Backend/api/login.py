@@ -49,3 +49,23 @@ def hapus_akun(Username):
     conn.commit()
     conn.close()
     return f"Akun {Username} berhasil dihapus."
+
+@Router.put("/Ganti Password")
+def ganti_password(Username,Password_Lama,Password_Baru):
+    conn=sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
+    cursor=conn.cursor()
+    cursor.execute(f'SELECT username,password FROM login WHERE username=?',(Username,))
+    row= cursor.fetchone()
+    
+    or_username=row[0]
+    or_password=row[1]
+
+    if Username==or_username and Password_Lama==or_password:
+        
+        cursor.execute('UPDATE login SET password = ? WHERE username=?',(Password_Baru,Username))
+        conn.commit()
+        conn.close()
+        return "Password berhasil diganti."
+    
+    else: 
+        return"Password tidak berhasil diubah."
