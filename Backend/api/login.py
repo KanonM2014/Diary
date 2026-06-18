@@ -7,7 +7,7 @@ Router = APIRouter()
 def login(Username, Password):
     conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")  
     cursor = conn.cursor()
-    login_var= cursor.execute ('SELECT username, password FROM login WHERE username=?', (Username,))
+    cursor.execute ('SELECT username, password FROM login WHERE username=?', (Username,))
     row = cursor.fetchone()
     conn.close()
     
@@ -25,7 +25,7 @@ def sign_up(Username, Password,Nama_Lengkap,Umur,Cita_cita):
     cursor = conn.cursor()
     cursor.execute(
         '''CREATE TABLE IF NOT EXISTS login(
-            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
             username TEXT NOT NULL,
             password TEXT NOT NULL,
             nama_lengkap TEXT NOT NULL,
