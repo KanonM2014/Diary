@@ -69,3 +69,12 @@ def ganti_password(Username,Password_Lama,Password_Baru):
     
     else: 
         return"Password tidak berhasil diubah."
+    
+@Router.put("/Update Profil")
+def update_profil(Username,Nama_Lengkap,Umur,Cita_cita):
+    conn=sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
+    cursor=conn.cursor()
+    cursor.execute('UPDATE login SET nama_lengkap=?,umur=?,cita_cita=? WHERE username=?',(Nama_Lengkap,Umur,Cita_cita,Username))
+    conn.commit()
+    conn.close()
+    return "Profil berhasil diperbarui."

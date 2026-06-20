@@ -71,15 +71,43 @@
             <h1>Diary Harian</h1>
             <p class="subtitle">Tulis cerita harimu di sini</p>
             <div class="header-actions">
-                <button class="btn btn-secondary" id="btn-change-password">Ganti Password</button>
-                <button class="btn btn-logout" id="btn-logout">Keluar</button>
-                <button class="btn btn-danger" id="btn-delete-account">Hapus Akun</button>
+                <button type="button" class="btn btn-secondary" id="btn-update-profile">Update Profil</button>
+                <button type="button" class="btn btn-secondary" id="btn-change-password">Ganti Password</button>
+                <button type="button" class="btn btn-logout" id="btn-logout">Keluar</button>
+                <button type="button" class="btn btn-danger" id="btn-delete-account">Hapus Akun</button>
             </div>
         </header>
+
+        <section class="card form-card" id="update-profile-card" style="display:none;">
+            <h2>👤 Update Profil</h2>
+            <form id="update-profile-form">
+                <div class="form-group">
+                    <label for="update-nama-lengkap">Nama Lengkap</label>
+                    <input type="text" id="update-nama-lengkap" placeholder="Masukkan nama lengkap baru..." required>
+                </div>
+                <div class="form-group">
+                    <label for="update-umur">Umur</label>
+                    <input type="number" id="update-umur" placeholder="Masukkan umur baru..." required>
+                </div>
+                <div class="form-group">
+                    <label for="update-cita-cita">Cita-cita</label>
+                    <input type="text" id="update-cita-cita" placeholder="Masukkan cita-cita baru..." required>
+                </div>
+                <div id="update-profile-error" class="login-error" style="display:none;"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Simpan Profil</button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-update-profile">Batal</button>
+                </div>
+            </form>
+        </section>
 
         <section class="card form-card" id="change-password-card" style="display:none;">
             <h2>🔐 Ganti Password</h2>
             <form id="change-password-form">
+                <div class="form-group">
+                    <label for="change-password-username">Username</label>
+                    <input type="text" id="change-password-username" placeholder="Masukkan username..." required>
+                </div>
                 <div class="form-group">
                     <label for="current-password">Password Lama</label>
                     <input type="password" id="current-password" placeholder="Masukkan password lama..." required>
@@ -152,6 +180,6 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast" style="display:none;"></div>
 
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=2"></script>
 </body>
 </html>
