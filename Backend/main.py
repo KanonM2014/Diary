@@ -1,5 +1,5 @@
-from .api.Dairy import Router as Diary_router
-from .api.login import Router as Login_router
+from api.Dairy import Router as Diary_router
+from api.login import Router as Login_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles

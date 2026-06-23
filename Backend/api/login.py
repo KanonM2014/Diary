@@ -11,6 +11,9 @@ def login(Username, Password):
     row = cursor.fetchone()
     conn.close()
     
+    if row is None:
+        return "Login failed"
+    
     or_username=row[0]
     or_password=row[1]
     if Username == or_username and Password == or_password:
@@ -57,6 +60,10 @@ def ganti_password(Username,Password_Lama,Password_Baru):
     cursor.execute(f'SELECT username,password FROM login WHERE username=?',(Username,))
     row= cursor.fetchone()
     
+    if row is None:
+        conn.close()
+        return "Username tidak ditemukan"
+    
     or_username=row[0]
     or_password=row[1]
 
@@ -67,7 +74,7 @@ def ganti_password(Username,Password_Lama,Password_Baru):
         conn.close()
         return "Password berhasil diganti."
     
-    else: 
+    else:
         return"Password tidak berhasil diubah."
     
 @Router.put("/Update Profil")
