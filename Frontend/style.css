@@ -167,11 +167,6 @@ body {
     margin-bottom: 32px;
 }
 
-#update-profile-card {
-    position: relative;
-    z-index: 5;
-}
-
 .form-card h2,
 .diary-section h2 {
     font-size: 1.25rem;

@@ -42,10 +42,9 @@ async function hapusAkun(username) {
     return res.text();
 }
 
-// Toggle Login/Signup
-window.addEventListener('DOMContentLoaded', () => {
-    console.log('Frontend script loaded and DOM ready');
-
+// Register DOM event listeners after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Toggle Login/Signup
     document.getElementById('toggle-signup').addEventListener('click', () => {
         document.getElementById('login-form-container').style.display = 'none';
         document.getElementById('signup-form-container').style.display = 'block';
@@ -58,195 +57,198 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Signup Form Handler
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const username = document.getElementById('signup-username').value.trim();
-    const password = document.getElementById('signup-password').value.trim();
-    const namaLengkap = document.getElementById('signup-nama-lengkap').value.trim();
-    const umur = document.getElementById('signup-umur').value.trim();
-    const citaCita = document.getElementById('signup-cita-cita').value.trim();
-    const errorEl = document.getElementById('signup-error');
+        e.preventDefault();
+        const username = document.getElementById('signup-username').value.trim();
+        const password = document.getElementById('signup-password').value.trim();
+        const namaLengkap = document.getElementById('signup-nama-lengkap').value.trim();
+        const umur = document.getElementById('signup-umur').value.trim();
+        const citaCita = document.getElementById('signup-cita-cita').value.trim();
+        const errorEl = document.getElementById('signup-error');
 
-    if (!username || !password || !namaLengkap || !umur || !citaCita) {
-        errorEl.textContent = 'Semua field harus diisi!';
-        errorEl.style.display = 'block';
-        return;
-    }
+        if (!username || !password || !namaLengkap || !umur || !citaCita) {
+            errorEl.textContent = 'Semua field harus diisi!';
+            errorEl.style.display = 'block';
+            return;
+        }
 
-    try {
-        const result = await signup(username, password, namaLengkap, umur, citaCita);
-        if (result.includes('berhasil')) {
-            errorEl.style.display = 'none';
-            alert('Pendaftaran berhasil! Silakan login.');
-            document.getElementById('signup-form').reset();
-            document.getElementById('signup-form-container').style.display = 'none';
-            document.getElementById('login-form-container').style.display = 'block';
-        } else {
-            errorEl.textContent = 'Gagal mendaftar!';
+        try {
+            const result = await signup(username, password, namaLengkap, umur, citaCita);
+            if (result.includes('berhasil')) {
+                errorEl.style.display = 'none';
+                alert('Pendaftaran berhasil! Silakan login.');
+                document.getElementById('signup-form').reset();
+                document.getElementById('signup-form-container').style.display = 'none';
+                document.getElementById('login-form-container').style.display = 'block';
+            } else {
+                errorEl.textContent = 'Gagal mendaftar!';
+                errorEl.style.display = 'block';
+            }
+        } catch (err) {
+            errorEl.textContent = 'Gagal menghubungi server.';
             errorEl.style.display = 'block';
         }
-    } catch (err) {
-        errorEl.textContent = 'Gagal menghubungi server.';
-        errorEl.style.display = 'block';
-    }
-});
+    });
 
-// Login Form Handler
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value.trim();
-    const errorEl = document.getElementById('login-error');
+    // Login Form Handler
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value.trim();
+        const errorEl = document.getElementById('login-error');
 
-    if (!username || !password) return;
+        if (!username || !password) return;
 
-    try {
-        console.log('Attempt login for:', username);
-        const result = await login(username, password);
-        console.log('Server login response:', result);
+        try {
+            console.log('Attempt login for:', username);
+            const result = await login(username, password);
+            console.log('Server login response:', result);
 
-        // Accept any response that contains "success" (case-insensitive)
-        if (typeof result === 'string' && result.toLowerCase().includes('success')) {
-            currentUsername = username;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-screen').style.display = 'block';
-            renderDiaries();
-        } else {
-            // Show server response to help debugging; fallback to generic message
-            errorEl.textContent = result && result.length ? result : 'Username atau password salah!';
+            // Accept any response that contains "success" (case-insensitive)
+            if (typeof result === 'string' && result.toLowerCase().includes('success')) {
+                currentUsername = username;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                renderDiaries();
+            } else {
+                // Show server response to help debugging; fallback to generic message
+                errorEl.textContent = result && result.length ? result : 'Username atau password salah!';
+                errorEl.style.display = 'block';
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            errorEl.textContent = 'Gagal menghubungi server.' + (err && err.message ? ' (' + err.message + ')' : '');
             errorEl.style.display = 'block';
         }
-    } catch (err) {
-        console.error('Login error:', err);
-        errorEl.textContent = 'Gagal menghubungi server.' + (err && err.message ? ' (' + err.message + ')' : '');
-        errorEl.style.display = 'block';
-    }
-});
+    });
 
-document.getElementById('btn-logout').addEventListener('click', () => {
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('login-form').reset();
-    document.getElementById('login-error').style.display = 'none';
-    currentUsername = null;
-});
-
-document.getElementById('btn-delete-account').addEventListener('click', async () => {
-    if (!currentUsername) return;
-    
-    const confirmed = confirm('Apakah Anda yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan dan semua data Anda akan hilang.');
-    if (!confirmed) return;
-    
-    try {
-        const result = await hapusAkun(currentUsername);
-        alert('Akun berhasil dihapus. Anda akan dialihkan ke halaman login.');
+    document.getElementById('btn-logout').addEventListener('click', () => {
         document.getElementById('app-screen').style.display = 'none';
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('login-form').reset();
         document.getElementById('login-error').style.display = 'none';
         currentUsername = null;
-    } catch (err) {
-        alert('Gagal menghapus akun: ' + err.message);
-    }
-});
+    });
 
-document.getElementById('btn-update-profile').addEventListener('click', () => {
-    document.getElementById('update-profile-error').style.display = 'none';
-    const card = document.getElementById('update-profile-card');
-    card.style.display = 'block';
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-});
+    document.getElementById('btn-delete-account').addEventListener('click', async () => {
+        if (!currentUsername) return;
+        
+        const confirmed = confirm('Apakah Anda yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan dan semua data Anda akan hilang.');
+        if (!confirmed) return;
+        
+        try {
+            const result = await hapusAkun(currentUsername);
+            alert('Akun berhasil dihapus. Anda akan dialihkan ke halaman login.');
+            document.getElementById('app-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').style.display = 'none';
+            currentUsername = null;
+        } catch (err) {
+            alert('Gagal menghapus akun: ' + err.message);
+        }
+    });
 
-document.getElementById('btn-change-password').addEventListener('click', () => {
-    const usernameField = document.getElementById('change-password-username');
-    usernameField.value = currentUsername || '';
-    document.getElementById('change-password-card').style.display = 'block';
-});
+    document.getElementById('btn-update-profile').addEventListener('click', () => {
+        if (!currentUsername) {
+            alert('Anda harus login terlebih dahulu.');
+            return;
+        }
+        document.getElementById('update-profile-error').style.display = 'none';
+        document.getElementById('update-profile-card').style.display = 'block';
+    });
 
-document.getElementById('btn-cancel-update-profile').addEventListener('click', () => {
-    document.getElementById('update-profile-card').style.display = 'none';
-    document.getElementById('update-profile-form').reset();
-    document.getElementById('update-profile-error').style.display = 'none';
-});
+    document.getElementById('btn-change-password').addEventListener('click', () => {
+        const usernameField = document.getElementById('change-password-username');
+        usernameField.value = currentUsername || '';
+        document.getElementById('change-password-card').style.display = 'block';
+    });
 
-document.getElementById('btn-cancel-password').addEventListener('click', () => {
-    document.getElementById('change-password-card').style.display = 'none';
-    document.getElementById('change-password-form').reset();
-    document.getElementById('change-password-error').style.display = 'none';
-});
-
-document.getElementById('update-profile-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const namaLengkap = document.getElementById('update-nama-lengkap').value.trim();
-    const umur = document.getElementById('update-umur').value.trim();
-    const citaCita = document.getElementById('update-cita-cita').value.trim();
-    const errorEl = document.getElementById('update-profile-error');
-
-    if (!namaLengkap || !umur || !citaCita) {
-        errorEl.textContent = 'Nama lengkap, umur, dan cita-cita harus diisi.';
-        errorEl.style.display = 'block';
-        return;
-    }
-
-    if (!currentUsername) {
-        errorEl.textContent = 'Anda harus login terlebih dahulu.';
-        errorEl.style.display = 'block';
-        return;
-    }
-
-    try {
-        const result = await updateProfil(namaLengkap, umur, citaCita);
-        showToast(result.toString(), 'success');
+    document.getElementById('btn-cancel-update-profile').addEventListener('click', () => {
         document.getElementById('update-profile-card').style.display = 'none';
         document.getElementById('update-profile-form').reset();
-        errorEl.style.display = 'none';
-    } catch (err) {
-        errorEl.textContent = err.message || 'Gagal memperbarui profil.';
-        errorEl.style.display = 'block';
-    }
-});
+        document.getElementById('update-profile-error').style.display = 'none';
+    });
 
-document.getElementById('change-password-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
+    document.getElementById('btn-cancel-password').addEventListener('click', () => {
+        document.getElementById('change-password-card').style.display = 'none';
+        document.getElementById('change-password-form').reset();
+        document.getElementById('change-password-error').style.display = 'none';
+    });
 
-    const username = document.getElementById('change-password-username').value.trim();
-    const currentPassword = document.getElementById('current-password').value.trim();
-    const newPassword = document.getElementById('new-password').value.trim();
-    const errorEl = document.getElementById('change-password-error');
+    document.getElementById('update-profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    if (!username || !currentPassword || !newPassword) {
-        errorEl.textContent = 'Username, password lama, dan password baru harus diisi.';
-        errorEl.style.display = 'block';
-        return;
-    }
+        const namaLengkap = document.getElementById('update-nama-lengkap').value.trim();
+        const umur = document.getElementById('update-umur').value.trim();
+        const citaCita = document.getElementById('update-cita-cita').value.trim();
+        const errorEl = document.getElementById('update-profile-error');
 
-    if (!currentUsername) {
-        errorEl.textContent = 'Anda harus login terlebih dahulu.';
-        errorEl.style.display = 'block';
-        return;
-    }
+        if (!namaLengkap || !umur || !citaCita) {
+            errorEl.textContent = 'Nama lengkap, umur, dan cita-cita harus diisi.';
+            errorEl.style.display = 'block';
+            return;
+        }
 
-    if (username !== currentUsername) {
-        errorEl.textContent = 'Username harus sama dengan akun yang sedang login.';
-        errorEl.style.display = 'block';
-        return;
-    }
+        if (!currentUsername) {
+            errorEl.textContent = 'Anda harus login terlebih dahulu.';
+            errorEl.style.display = 'block';
+            return;
+        }
 
-    try {
-        const result = await gantiPassword(username, currentPassword, newPassword);
-        if (result.toLowerCase().includes('berhasil')) {
-            showToast('Password berhasil diganti!', 'success');
-            document.getElementById('change-password-card').style.display = 'none';
-            document.getElementById('change-password-form').reset();
+        try {
+            const result = await updateProfil(namaLengkap, umur, citaCita);
+            showToast(result.toString(), 'success');
+            document.getElementById('update-profile-card').style.display = 'none';
+            document.getElementById('update-profile-form').reset();
             errorEl.style.display = 'none';
-        } else {
-            errorEl.textContent = result;
+        } catch (err) {
+            errorEl.textContent = err.message || 'Gagal memperbarui profil.';
             errorEl.style.display = 'block';
         }
-    } catch (err) {
-        errorEl.textContent = err.message || 'Gagal mengganti password.';
-        errorEl.style.display = 'block';
-    }
+    });
+
+    document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('change-password-username').value.trim();
+        const currentPassword = document.getElementById('current-password').value.trim();
+        const newPassword = document.getElementById('new-password').value.trim();
+        const errorEl = document.getElementById('change-password-error');
+
+        if (!username || !currentPassword || !newPassword) {
+            errorEl.textContent = 'Username, password lama, dan password baru harus diisi.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        if (!currentUsername) {
+            errorEl.textContent = 'Anda harus login terlebih dahulu.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        if (username !== currentUsername) {
+            errorEl.textContent = 'Username harus sama dengan akun yang sedang login.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const result = await gantiPassword(username, currentPassword, newPassword);
+            if (result.toLowerCase().includes('berhasil')) {
+                showToast('Password berhasil diganti!', 'success');
+                document.getElementById('change-password-card').style.display = 'none';
+                document.getElementById('change-password-form').reset();
+                errorEl.style.display = 'none';
+            } else {
+                errorEl.textContent = result;
+                errorEl.style.display = 'block';
+            }
+        } catch (err) {
+            errorEl.textContent = err.message || 'Gagal mengganti password.';
+            errorEl.style.display = 'block';
+        }
+    });
 });
 
 // ===== Utility Functions =====
