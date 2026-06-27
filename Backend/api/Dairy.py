@@ -1,13 +1,13 @@
-import sqlite3
+
 
 from fastapi import APIRouter
-
+from database.db import get_connection
 Router = APIRouter()
 
 
 @Router.post ("/Diary")
 def MembuatDiary (tanggal:str,judul:str,isi:str):
-    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
         '''CREATE TABLE IF NOT EXISTS diary(
@@ -28,7 +28,7 @@ def MembuatDiary (tanggal:str,judul:str,isi:str):
 
 @Router.get("/Diary")
 def MembacaDiary ():
-    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM diary')
     diaries = cursor.fetchall()
@@ -37,7 +37,7 @@ def MembacaDiary ():
 
 @Router.delete ("/Diary")
 def MenghapusDiary (Urutan:int):
-    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(f'DELETE FROM diary WHERE id={Urutan}')
     conn.commit()
@@ -45,7 +45,7 @@ def MenghapusDiary (Urutan:int):
     return f"Diary berhasil dihapus."
 @Router.put ("/Diary")
 def MembenarkanDiary (Urutan:int,Pilihan:str,Mengganti:str):
-    conn = sqlite3.connect(r"D:\Kanon\Diary\database\Diary.db")
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
     'UPDATE diary SET {} = ? WHERE id = ?'.format(Pilihan),
