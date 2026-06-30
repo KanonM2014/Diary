@@ -1,5 +1,3 @@
-
-
 from fastapi import APIRouter
 
 from database.db import get_connection
