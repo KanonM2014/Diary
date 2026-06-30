@@ -3,7 +3,6 @@ from fastapi import APIRouter
 from database.db import get_connection
 Router = APIRouter()
 
-
 @Router.post ("/Diary")
 def MembuatDiary (tanggal:str,judul:str,isi:str):
     with get_connection() as conn :

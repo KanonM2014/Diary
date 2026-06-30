@@ -59,22 +59,20 @@ def ganti_password(Username,Password_Lama,Password_Baru):
         cursor.execute(f'SELECT username,password FROM login WHERE username=?',(Username,))
         row= cursor.fetchone()
     
-    if row is None:
+        if row is None:
+            
+            return "Username tidak ditemukan"
         
-        return "Username tidak ditemukan"
-    
-    or_username=row[0]
-    or_password=row[1]
+        or_username=row[0]
+        or_password=row[1]
 
-    if Username==or_username and Password_Lama==or_password:
+        if Username==or_username and Password_Lama==or_password:
+            
+            cursor.execute('UPDATE login SET password = ? WHERE username=?',(Password_Baru,Username))
+            return "Password berhasil diganti."
         
-        cursor.execute('UPDATE login SET password = ? WHERE username=?',(Password_Baru,Username))
-        conn.commit()
-        conn.close()
-        return "Password berhasil diganti."
-    
-    else:
-        return"Password tidak berhasil diubah."
+        else:
+            return"Password tidak berhasil diubah."
     
 @Router.put("/Update Profil")
 def update_profil(Username,Nama_Lengkap,Umur,Cita_cita):
