@@ -5,23 +5,28 @@ Router = APIRouter()
 
 @Router.post ("/Diary")
 def MembuatDiary (tanggal:str,judul:str,isi:str):
-    with get_connection() as conn :
-        cursor = conn.cursor()
-        cursor.execute(
-            '''CREATE TABLE IF NOT EXISTS diary(
-                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                Tanggal TEXT NOT NULL,
-                Judul TEXT NOT NULL,
-                Isi TEXT NOT NULL
+    if tanggal== "" or judul=="" or isi=="":
+        return "Diary tidak berhasil ditambahkan."
+    else:
+        with get_connection() as conn :
+            cursor = conn.cursor()
+            cursor.execute(
+                '''CREATE TABLE IF NOT EXISTS diary(
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    Tanggal TEXT NOT NULL,
+                    Judul TEXT NOT NULL,
+                    Isi TEXT NOT NULL
+                )
+                '''
+            )       
+            cursor.execute(
+            'INSERT INTO diary (Tanggal, Judul, Isi) VALUES (?, ?, ?)', 
+            (tanggal, judul, isi)
             )
-            '''
-        )       
-        cursor.execute(
-        'INSERT INTO diary (Tanggal, Judul, Isi) VALUES (?, ?, ?)', 
-        (tanggal, judul, isi)
-        )
+        return "Diary berhasil ditambahkan." 
+     
 
-    return f"Diary berhasil ditambahkan."
+
 
 @Router.get("/Diary")
 def MembacaDiary ():
@@ -33,11 +38,14 @@ def MembacaDiary ():
 
 @Router.delete ("/Diary")
 def MenghapusDiary (Urutan:int):
-    with get_connection() as conn :
-        cursor = conn.cursor()
-        cursor.execute(f'DELETE FROM diary WHERE id={Urutan}')
+    if Urutan == str :
+        return "Diary tidak berhasil dihapus."
+    else:
+        with get_connection() as conn :
+            cursor = conn.cursor()
+            cursor.execute(f'DELETE FROM diary WHERE id={Urutan}')
 
-    return f"Diary berhasil dihapus."
+        return f"Diary berhasil dihapus."
 @Router.put ("/Diary")
 def MembenarkanDiary (Urutan:int,Pilihan:str,Mengganti:str):
     with get_connection() as conn :
