@@ -2,6 +2,7 @@ import pytest
 
 from Backend.api.Dairy import MembuatDiary
 from Backend.api.Dairy import MenghapusDiary
+from Backend.api.Dairy import MembenarkanDiary
 
 def test_membuat_diary():
     assert MembuatDiary("15/05/2025","hikafhif","gsafdfa") == "Diary berhasil ditambahkan."
@@ -15,4 +16,9 @@ def test_membuat_diary():
 def test_menghapus_diary():
     assert MenghapusDiary("vfhsxhbgfg") == "Diary tidak berhasil dihapus."
     assert MenghapusDiary(0.4) == "Diary tidak berhasil dihapus."
-    
+    assert MenghapusDiary(100) == "Data tidak ada."
+    assert MenghapusDiary(0)   == "Data tidak ada."
+
+def test_membenarkan_diary():
+    assert MembenarkanDiary(1,3,5)=="Diary tidak berhasil diubah."
+ 

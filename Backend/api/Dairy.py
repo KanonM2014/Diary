@@ -25,9 +25,6 @@ def MembuatDiary (tanggal:str,judul:str,isi:str):
             )
         return "Diary berhasil ditambahkan." 
      
-
-
-
 @Router.get("/Diary")
 def MembacaDiary ():
     with get_connection() as conn :
@@ -38,12 +35,17 @@ def MembacaDiary ():
 
 @Router.delete ("/Diary")
 def MenghapusDiary (Urutan:int):
-    if Urutan == str :
+
+    if (type(Urutan) == str or type(Urutan) == float):
         return "Diary tidak berhasil dihapus."
     else:
         with get_connection() as conn :
             cursor = conn.cursor()
-            cursor.execute(f'DELETE FROM diary WHERE id={Urutan}')
+            cursor.execute(f'SELECT * FROM diary WHERE id =?',(Urutan,))
+            Bebas=cursor.fetchall()
+            if len(Bebas)== 0:
+                return"Data tidak ada."
+            cursor.execute(f'DELETE FROM diary WHERE id=?',(Urutan,))
 
         return f"Diary berhasil dihapus."
 @Router.put ("/Diary")
