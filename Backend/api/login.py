@@ -23,26 +23,31 @@ def login(Username, Password):
 
     
 @Router.post("/Sign Up")
-def sign_up(Username, Password,Nama_Lengkap,Umur,Cita_cita):
-    with get_connection() as conn :
-        cursor = conn.cursor()
-        cursor.execute(
-            '''CREATE TABLE IF NOT EXISTS login(
-                id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-                username TEXT NOT NULL,
-                password TEXT NOT NULL,
-                nama_lengkap TEXT NOT NULL,
-                umur INTEGER NOT NULL,
-                cita_cita TEXT NOT NULL
+def sign_up(Username:str, Password:str,Nama_Lengkap:str,Umur:int,Cita_cita:str):
+    if (type(Username)==int or type (Username)==float) or (type (Password)==int or type (Password)==float)or(type (Nama_Lengkap)==int or type (Nama_Lengkap)==float)or(type(Umur)==str or type(Umur)==float)or(type (Cita_cita)==int or type (Cita_cita)==float):
+        return"Tidak bisa Sign Up."
+    elif Username=="" or Password=="" or Nama_Lengkap=="" or Umur=="" or Cita_cita=="":
+        return "Tidak bisa Sign Up."
+    else:
+        with get_connection() as conn :
+            cursor = conn.cursor()
+            cursor.execute(
+                '''CREATE TABLE IF NOT EXISTS login(
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                    username TEXT NOT NULL,
+                    password TEXT NOT NULL,
+                    nama_lengkap TEXT NOT NULL,
+                    umur INTEGER NOT NULL,
+                    cita_cita TEXT NOT NULL
+                )
+                '''
+            )       
+            cursor.execute(
+            'INSERT INTO login (username, password,nama_lengkap,umur,cita_cita) VALUES (?, ?, ?, ?, ?)', 
+            (Username, Password,Nama_Lengkap,Umur,Cita_cita)
             )
-            '''
-        )       
-        cursor.execute(
-        'INSERT INTO login (username, password,nama_lengkap,umur,cita_cita) VALUES (?, ?, ?, ?, ?)', 
-        (Username, Password,Nama_Lengkap,Umur,Cita_cita)
-        )
-    
-    return f"Sign Up berhasil."
+        
+        return f"Sign Up berhasil."
 
 @Router.delete("/Hapus Akun")
 def hapus_akun(Username):

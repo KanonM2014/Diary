@@ -50,11 +50,16 @@ def MenghapusDiary (Urutan:int):
         return f"Diary berhasil dihapus."
 @Router.put ("/Diary")
 def MembenarkanDiary (Urutan:int,Pilihan:str,Mengganti:str):
-    with get_connection() as conn :
-        cursor = conn.cursor()
-        cursor.execute(
-        'UPDATE diary SET {} = ? WHERE id = ?'.format(Pilihan),
-        (Mengganti, Urutan)
-    )
+    if (type (Urutan)==str or type(Urutan)==float) or (type (Pilihan)==int or type(Pilihan)==float) or (type (Mengganti)==int or type (Mengganti)==float):
+        return"Diary tidak berhasil diubah."
+    elif Urutan=="" or Pilihan=="" or Mengganti=="":
+        return"Diary tidak berhasil diubah."
+    else:
+        with get_connection() as conn :
+            cursor = conn.cursor()
+            cursor.execute(
+            'UPDATE diary SET {} = ? WHERE id = ?'.format(Pilihan),
+            (Mengganti, Urutan)
+        )
 
-    return f"Diary berhasil diganti."
+        return f"Diary berhasil diganti."
