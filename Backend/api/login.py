@@ -50,34 +50,42 @@ def sign_up(Username:str, Password:str,Nama_Lengkap:str,Umur:int,Cita_cita:str):
         return f"Sign Up berhasil."
 
 @Router.delete("/Hapus Akun")
-def hapus_akun(Username):
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(f'DELETE FROM login WHERE username="{Username}"')
+def hapus_akun(Username:str):
+    if (type(Username) ==int or type(Username) ==float) :
+        return"Akun tidak berhasil dihapus."
+    elif Username=="":
+        return"Username harus diisi."
+    else:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'DELETE FROM login WHERE username="{Username}"')
 
-    return f"Akun {Username} berhasil dihapus."
+        return f"Akun berhasil dihapus."
 
 @Router.put("/Ganti Password")
-def ganti_password(Username,Password_Lama,Password_Baru):
-    with get_connection() as conn:
-        cursor=conn.cursor()
-        cursor.execute(f'SELECT username,password FROM login WHERE username=?',(Username,))
-        row= cursor.fetchone()
-    
-        if row is None:
-            
-            return "Username tidak ditemukan"
+def ganti_password(Username:str,Password_Lama:str,Password_Baru:str):
+    if (type(Username)==int or type(Username)==float) or(type) :
+        return""
+    else:
+        with get_connection() as conn:
+            cursor=conn.cursor()
+            cursor.execute(f'SELECT username,password FROM login WHERE username=?',(Username,))
+            row= cursor.fetchone()
         
-        or_username=row[0]
-        or_password=row[1]
+            if row is None:
+                
+                return "Username tidak ditemukan"
+            
+            or_username=row[0]
+            or_password=row[1]
 
-        if Username==or_username and Password_Lama==or_password:
+            if Username==or_username and Password_Lama==or_password:
+                
+                cursor.execute('UPDATE login SET password = ? WHERE username=?',(Password_Baru,Username))
+                return "Password berhasil diganti."
             
-            cursor.execute('UPDATE login SET password = ? WHERE username=?',(Password_Baru,Username))
-            return "Password berhasil diganti."
-        
-        else:
-            return"Password tidak berhasil diubah."
+            else:
+                return"Password tidak berhasil diubah."
     
 @Router.put("/Update Profil")
 def update_profil(Username,Nama_Lengkap,Umur,Cita_cita):
