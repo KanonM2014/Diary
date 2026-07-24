@@ -64,8 +64,10 @@ def hapus_akun(Username:str):
 
 @Router.put("/Ganti Password")
 def ganti_password(Username:str,Password_Lama:str,Password_Baru:str):
-    if (type(Username)==int or type(Username)==float) or(type) :
-        return""
+    if (type(Username)==int or type(Username)==float) or(type(Password_Lama)==int or type (Password_Lama)==float) or (type (Password_Baru)==int or type (Password_Baru)==float) :
+        return "Password tidak berhasil diubah."
+    elif Username=="" or Password_Lama=="" or Password_Baru=="":
+        return "Password tidak berhasil diubah."
     else:
         with get_connection() as conn:
             cursor=conn.cursor()
@@ -88,9 +90,14 @@ def ganti_password(Username:str,Password_Lama:str,Password_Baru:str):
                 return"Password tidak berhasil diubah."
     
 @Router.put("/Update Profil")
-def update_profil(Username,Nama_Lengkap,Umur,Cita_cita):
-    with get_connection() as conn :
-        cursor=conn.cursor()
-        cursor.execute('UPDATE login SET nama_lengkap=?,umur=?,cita_cita=? WHERE username=?',(Nama_Lengkap,Umur,Cita_cita,Username))
+def update_profil(Username:str,Nama_Lengkap:str,Umur:int,Cita_cita:str):
+    if (type (Username)==int or type (Username)==float) or (type (Nama_Lengkap)==int or type (Nama_Lengkap)==float) or (type (Umur)==str or type (Umur)==float) or (type (Cita_cita)==int or type (Cita_cita)==float) : 
+        return "Tidak bisa Update Profil. "
+    elif Username=="" or Nama_Lengkap=="" or Umur =="" or Cita_cita == "" :
+        return "Tidak bisa Update Profil. "
+    else:
+        with get_connection() as conn :
+            cursor=conn.cursor()
+            cursor.execute('UPDATE login SET nama_lengkap=?,umur=?,cita_cita=? WHERE username=?',(Nama_Lengkap,Umur,Cita_cita,Username))
 
-    return "Profil berhasil diperbarui."
+        return "Update Profil berhasil."
